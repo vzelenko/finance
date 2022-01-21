@@ -2,7 +2,7 @@
 doc/
 coverage/
 *.gem
-Gemfile.lock
+# Gemfile.lock
 *.swp
 .bundle
 .idea
