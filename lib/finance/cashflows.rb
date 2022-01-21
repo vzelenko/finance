@@ -3,22 +3,23 @@ require_relative 'rates'
 
 require 'bigdecimal'
 require 'bigdecimal/newton'
-include Newton
 
 module Finance
   # Provides methods for working with cash flows (collections of transactions)
   # @api public
   module Cashflow
+    include Newton
+    PERIOD = ENV['CASH_FLOW_DAYS_IN_YEAR'].presence || 365.0
     # Base class for working with Newton's Method.
     # @api private
     class Function
       values = {
-        eps: "1.0e-16",
-        one: "1.0",
-        two: "2.0",
+        eps: ENV['CASH_FLOW_EPS'].presence || "1.0e-16",
+        one: '1.0',
+        two: '2.0',
         ten: "10.0",
         zero: "0.0"
-        }
+      }
 
       values.each do |key, value|
         define_method key do
@@ -58,6 +59,7 @@ module Finance
 
     def method_missing(name, *args, &block)
       return self.inject(:+) if name.to_s == "sum"
+
       super
     end
 
@@ -71,9 +73,11 @@ module Finance
     def npv(rate)
       self.collect! { |entry| Flt::DecNum.new(entry.to_s) }
 
-      rate, total = Flt::DecNum.new(rate.to_s), Flt::DecNum.new(0.to_s)
+      rate = Flt::DecNum.new(rate.to_s)
+      total = Flt::DecNum.new(0.to_s)
+
       self.each_with_index do |cashflow, index|
-        total += cashflow / (1 + rate) ** index
+        total += cashflow / (1 + rate)**index
       end
 
       total
@@ -92,13 +96,13 @@ module Finance
       # Make sure we have a valid sequence of cash flows.
       positives, negatives = self.partition{ |t| t.amount >= 0 }
       if positives.empty? || negatives.empty?
-        raise ArgumentError, "Calculation does not converge."
+        raise ArgumentError, 'Calculation does not converge.'
       end
 
       func = Function.new(self, :xnpv)
       rate = [ func.one ]
       nlsolve( func, rate )
-      Rate.new(rate[0], :apr, :compounds => :annually)
+      Rate.new(rate[0], :apr, compounds: :annually)
     end
 
     # calculate the net present value of a sequence of cash flows
@@ -115,7 +119,7 @@ module Finance
       start = self[0].date
 
       self.inject(0) do |sum, t|
-        n = t.amount / ( (1 + rate) ** ((t.date-start) / Flt::DecNum.new(31536000.to_s))) # 365 * 86400
+        n = t.amount / ((1 + rate)**((t.date - start) / Flt::DecNum.new((CASH_FLOW_DAYS_IN_YEAR * 86_400.0).to_s)))
         sum + n
       end
     end
