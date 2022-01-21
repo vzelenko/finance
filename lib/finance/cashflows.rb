@@ -9,7 +9,7 @@ module Finance
   # @api public
   module Cashflow
     include Newton
-    PERIOD = ENV['CASH_FLOW_DAYS_IN_YEAR'].presence.to_f || 365.0
+    PERIOD = (ENV['CASH_FLOW_DAYS_IN_YEAR'].presence || '365').to_f
     # Base class for working with Newton's Method.
     # @api private
     class Function
@@ -119,7 +119,7 @@ module Finance
       start = self[0].date
 
       self.inject(0) do |sum, t|
-        n = t.amount / ((1 + rate)**((t.date - start) / Flt::DecNum.new((CASH_FLOW_DAYS_IN_YEAR * 86_400.0).to_s)))
+        n = t.amount / ((1 + rate)**((t.date - start) / Flt::DecNum.new((PERIOD * 86_400.0).to_s)))
         sum + n
       end
     end
