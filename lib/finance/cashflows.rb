@@ -9,7 +9,7 @@ module Finance
   # @api public
   module Cashflow
     include Newton
-    PERIOD = ENV['CASH_FLOW_DAYS_IN_YEAR'].presence || 365.0
+    PERIOD = ENV['CASH_FLOW_DAYS_IN_YEAR'].presence.to_f || 365.0
     # Base class for working with Newton's Method.
     # @api private
     class Function
