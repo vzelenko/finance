@@ -37,12 +37,12 @@ describe 'XIRR Tests' do
   it 'Computes XIRR properly' do
     xirr = @data.xirr.apr
     # assert_equal(D('0.158225638'), xirr.round(9))
-    assert_equal(D('0.1582'), xirr.round(4))
+    assert_equal(BigDecimal(0.1582, 12), xirr.round(4))
   end
 
   it 'Also computes XIRR' do
     xirr = @data2.xirr.apr
-    exp = D('0.3734')
+    exp = BigDecimal(0.3734, 12)
     assert_equal(exp, xirr.round(4))
   end
 

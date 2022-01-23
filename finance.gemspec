@@ -1,6 +1,6 @@
 SPEC = Gem::Specification.new do |s|
   s.name = "finance"
-  s.version = "2.0.1"
+  s.version = "2.0.2"
   s.author = "Bill Kranec"
   s.license = "LGPL-3.0"
   s.email = "wkranec@gmail.com"
@@ -10,7 +10,6 @@ SPEC = Gem::Specification.new do |s|
   s.homepage = "https://rubygems.org/gems/finance"
 
   s.required_ruby_version = '>=1.9'
-  s.add_dependency 'flt', '>=1.3.0'
   s.add_development_dependency 'minitest', '>= 4.7.5'
   s.add_development_dependency 'activesupport', '>= 4.0.0'
   s.add_development_dependency 'pry'

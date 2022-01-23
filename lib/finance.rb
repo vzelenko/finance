@@ -1,4 +1,3 @@
-require 'finance/decimal'
 require 'finance/cashflows'
 
 # The *Finance* module adheres to the following conventions for
@@ -9,6 +8,7 @@ require 'finance/cashflows'
 #  * *principal* represents the outstanding balance of a loan or annuity.
 #  * *rate* represents the interest rate _per period_.
 module Finance
+  autoload :Constants, 'finance/constants'
   autoload :Amortization, 'finance/amortization'
   autoload :Rate,         'finance/rates'
   autoload :Transaction,  'finance/transaction'

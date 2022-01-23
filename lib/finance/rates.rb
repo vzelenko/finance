@@ -1,5 +1,3 @@
-require_relative 'decimal'
-
 module Finance
   # the Rate class provides an interface for working with interest rates.
   # {render:Rate#new}
@@ -55,13 +53,13 @@ module Finance
     # @api private
     def compounds=(input)
       @periods = case input
-                 when :annually     then Flt::DecNum.new(1)
-                 when :continuously then Flt::DecNum.infinity
-                 when :daily        then Flt::DecNum.new(365)
-                 when :monthly      then Flt::DecNum.new(12)
-                 when :quarterly    then Flt::DecNum.new(4)
-                 when :semiannually then Flt::DecNum.new(2)
-                 when Numeric       then Flt::DecNum.new(input.to_s)
+                 when :annually     then BigDecimal(1, 12)
+                 when :continuously then BigDecimal::INFINITY
+                 when :daily        then BigDecimal(365, 12)
+                 when :monthly      then BigDecimal(12, 12)
+                 when :quarterly    then BigDecimal(4, 12)
+                 when :semiannually then BigDecimal(2, 12)
+                 when Numeric       then BigDecimal(input, 12)
                  else raise ArgumentError
                  end
     end
@@ -98,7 +96,7 @@ module Finance
 
       # Set the rate in the proper way, based on the value of type.
       begin
-        send("#{TYPES.fetch(type)}=", Flt::DecNum.new(rate.to_s))
+        send("#{TYPES.fetch(type)}=", BigDecimal(rate, 12))
       rescue KeyError
         raise ArgumentError, "type must be one of #{TYPES.keys.join(', ')}", caller
       end
@@ -135,9 +133,10 @@ module Finance
     #   Rate.to_effective(0.05, 4) #=> DecNum('0.05095')
     # @api public
     def Rate.to_effective(rate, periods)
-      rate, periods = Flt::DecNum.new(rate.to_s), Flt::DecNum.new(periods.to_s)
+      rate = BigDecimal(rate, 12)
+      periods = Flt::DecNum.new(periods, 12)
 
-      if periods.infinite?
+      if periods == BigDecimal::INFINITY
         rate.exp - 1
       else
         (1 + rate / periods) ** periods - 1
@@ -153,7 +152,8 @@ module Finance
     # @see http://www.miniwebtool.com/nominal-interest-rate-calculator/
     # @api public
     def Rate.to_nominal(rate, periods)
-      rate, periods = Flt::DecNum.new(rate.to_s), Flt::DecNum.new(periods.to_s)
+      rate = BigDecimal(rate, 12)
+      periods = BigDecimal(periods, 12)
 
       if periods.infinite?
         (rate + 1).log

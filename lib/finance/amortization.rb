@@ -1,5 +1,4 @@
 require_relative 'cashflows'
-require_relative 'decimal'
 require_relative 'transaction'
 
 module Finance
@@ -33,7 +32,7 @@ module Finance
     attr_reader :rates
 
     # compare two Amortization instances
-    # @return [Numeric] -1, 0, or +1
+    # @return [Boolean]
     # @param [Amortization]
     # @api public
     def ==(amortization)
@@ -66,7 +65,7 @@ module Finance
 
       rate.duration.to_i.times do
         # Do this first in case the balance is zero already.
-        if @balance.zero? then break end
+        break if @balance.zero?
 
         # Compute and record interest on the outstanding balance.
         int = (@balance * rate.monthly).round(2)
@@ -75,7 +74,7 @@ module Finance
         @transactions << interest.dup
 
         # Record payment.  Don't pay more than the outstanding balance.
-        if pmt.amount.abs > @balance then pmt.amount = -@balance end
+        pmt.amount = -@balance if pmt.amount.abs > @balance
         @transactions << pmt.dup
         @balance += pmt.amount
 
@@ -130,7 +129,7 @@ module Finance
     # @param [Proc] block
     # @api public
     def initialize(principal, *rates, &block)
-      @principal = Flt::DecNum.new(principal.to_s)
+      @principal = BigDecimal(principal, 12)
       @rates     = rates
       @block     = block
 

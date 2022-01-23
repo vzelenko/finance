@@ -1,5 +1,3 @@
-require_relative 'decimal'
-
 module Finance
   # the Transaction class provides a general interface for working with individual cash flows.
   # @api public
@@ -24,7 +22,7 @@ module Finance
     #   t.amount #=> 750
     # @api public
     def amount=(value)
-      @amount = Flt::DecNum.new(value.to_s)
+      @amount = BigDecimal(value, 12)
     end
 
     # @return [DecNum] the difference between the original transaction

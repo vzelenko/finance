@@ -1,9 +1,6 @@
-require_relative 'decimal'
 require_relative 'rates'
 
-require 'bigdecimal'
 require 'bigdecimal/newton'
-
 module Finance
   # Provides methods for working with cash flows (collections of transactions)
   # @api public
@@ -33,7 +30,7 @@ module Finance
       end
 
       def values(x)
-        value = @transactions.send(@function, Flt::DecNum.new(x[0].to_s))
+        value = @transactions.send(@function, BigDecimal(x[0], 12))
         [BigDecimal(value.to_s)]
       end
     end
@@ -71,10 +68,10 @@ module Finance
     # @see http://en.wikipedia.org/wiki/Net_present_value
     # @api public
     def npv(rate)
-      self.collect! { |entry| Flt::DecNum.new(entry.to_s) }
+      self.collect! { |entry| BigDecimal(entry, 12) }
 
-      rate = Flt::DecNum.new(rate.to_s)
-      total = Flt::DecNum.new(0.to_s)
+      rate = BigDecimal(rate, 12)
+      total = BigDecimal(0, 12)
 
       self.each_with_index do |cashflow, index|
         total += cashflow / (1 + rate)**index
@@ -115,11 +112,11 @@ module Finance
     #   @transactions.xnpv(0.6).round(2) #=> -937.41
     # @api public
     def xnpv(rate)
-      rate  = Flt::DecNum.new(rate.to_s)
+      rate  = BigDecimal(rate, 12)
       start = self[0].date
 
       self.inject(0) do |sum, t|
-        n = t.amount / ((1 + rate)**((t.date - start) / Flt::DecNum.new((PERIOD * 86_400.0).to_s)))
+        n = t.amount / ((1 + rate)**((t.date - start) / BigDecimal(PERIOD * 86_400.0, 12)))
         sum + n
       end
     end
